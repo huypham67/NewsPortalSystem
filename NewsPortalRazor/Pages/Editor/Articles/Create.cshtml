@@ -1,0 +1,80 @@
+﻿@page
+@model NewsPortalRazor.Pages.Editor.Articles.CreateModel
+
+@{
+    ViewData["Title"] = "Create Article";
+}
+
+<h2 class="mb-4"><i class="fas fa-newspaper"></i> Create New Article</h2>
+
+<div class="card shadow-lg p-4">
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="row g-3">
+            <!-- ArticleId (Readonly & Required) -->
+            <div class="col-md-12">
+                <label asp-for="Article.ArticleId" class="form-label fw-bold"><i class="fas fa-key"></i> Article ID</label>
+                <input asp-for="Article.ArticleId" class="form-control" readonly required />
+                <span asp-validation-for="Article.ArticleId" class="text-danger"></span>
+            </div>
+            <!-- Title -->
+            <div class="col-md-12">
+                <label asp-for="Article.Title" class="form-label fw-bold"><i class="fas fa-heading"></i> Title</label>
+                <input asp-for="Article.Title" class="form-control" placeholder="Enter article title" required />
+                <span asp-validation-for="Article.Title" class="text-danger"></span>
+            </div>
+
+            <!-- Headline -->
+            <div class="col-md-12">
+                <label asp-for="Article.Headline" class="form-label fw-bold"><i class="fas fa-quote-left"></i> Headline</label>
+                <input asp-for="Article.Headline" class="form-control" placeholder="Enter a short headline" required />
+                <span asp-validation-for="Article.Headline" class="text-danger"></span>
+            </div>
+
+            <!-- Content -->
+            <div class="col-md-12">
+                <label asp-for="Article.Content" class="form-label fw-bold"><i class="fas fa-file-alt"></i> Content</label>
+                <textarea asp-for="Article.Content" class="form-control" rows="6" placeholder="Write your article content here..." required></textarea>
+                <span asp-validation-for="Article.Content" class="text-danger"></span>
+            </div>
+
+            <!-- Category -->
+            <div class="col-md-6">
+                <label asp-for="Article.CategoryId" class="form-label fw-bold"><i class="fas fa-folder"></i> Category</label>
+                <select asp-for="Article.CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                    <option value="">-- Select Category --</option>
+                </select>
+                <span asp-validation-for="Article.CategoryId" class="text-danger"></span>
+            </div>
+
+            <!-- Tags (Multiple) -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold"><i class="fas fa-tags"></i> Tags</label>
+                <select asp-for="SelectedTagIds" class="form-select" asp-items="ViewBag.Tags" multiple></select>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div>
+                <button type="submit" class="btn btn-secondary btn-lg" asp-page-handler="SaveDraft">
+                    <i class="fas fa-save"></i> Save Draft
+                </button>
+                <button type="submit" class="btn btn-primary btn-lg" asp-page-handler="PostForApproval">
+                    <i class="fas fa-paper-plane"></i> Post for Approval
+                </button>
+            </div>
+            <a asp-page="Index" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

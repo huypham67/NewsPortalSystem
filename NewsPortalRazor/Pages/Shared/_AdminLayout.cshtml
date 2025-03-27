@@ -1,0 +1,131 @@
+﻿@using System.Security.Claims
+@using Services
+@inject IArticleService ArticleService
+
+@{
+    var latestArticles = await ArticleService.GetLatestArticles(5); // Lấy 5 bài mới nhất
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <i class="fa-solid fa-user-shield"></i> Admin Panel
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Index">
+                                <i class="fa-solid fa-chart-line"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Users/Index">
+                                <i class="fa-solid fa-users"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Categories/Index">
+                                <i class="fa-solid fa-layer-group"></i> Categories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Tags/Index">
+                                <i class="fa-solid fa-tags"></i> Tags
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Articles/Index">
+                                <i class="fa-solid fa-newspaper"></i> Articles
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Notification Dropdown -->
+                    <div class="dropdown me-3">
+                        <a class="nav-link text-white dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-bell"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notificationList">
+                            @foreach (var article in latestArticles)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-page="/Viewer/ArticleDetail" asp-route-id="@article.ArticleId">
+                                        <strong>@article.Title</strong> - <small>@article.CreatedAt?.ToString("MMMM dd, yyyy")</small>
+                                    </a>
+                                </li>
+                            }
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="text-center">
+                                <button id="loadMoreNotifications" class="btn btn-link">Load more</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var userName = User.FindFirstValue(ClaimTypes.Name);
+                        var userRole = User.FindFirstValue(ClaimTypes.Role);
+                        <div class="d-flex align-items-center">
+                            <span class="text-white me-2"><i class="fa-solid fa-user"></i> @userName - @userRole</span>
+                            <form method="post" asp-page="/Logout">
+                                <button class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container mt-3">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="footer mt-3">
+        <div class="container text-center">
+            <p>&copy; @DateTime.Now.Year Admin Panel - All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            let page = 1;
+            $("#loadMoreNotifications").on("click", function () {
+                page++;
+                $.get("/api/articles/latest", { page: page }, function (data) {
+                    if (data.length > 0) {
+                        data.forEach(article => {
+                            $("#notificationList").prepend(
+                                `<li><a class='dropdown-item' href='/Viewer/ArticleDetail?id=${article.articleId}'>
+                                                    <strong>${article.title}</strong> - <small>${article.createdAt}</small>
+                                                </a></li>`
+                            );
+                        });
+                    } else {
+                        $("#loadMoreNotifications").hide();
+                    }
+                });
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,105 @@
+﻿@using System.Security.Claims
+@using Services
+@inject ICategoryService CategoryService
+@inject IArticleService ArticleService
+
+@{
+    var categories = await CategoryService.GetActiveCategories();
+    var latestArticles = await ArticleService.GetLatestArticles(5);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Editor Panel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-page="/Index">
+                    <i class="fa-solid fa-pen-to-square"></i> Editor Panel
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" asp-page="/Index"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/Editor/Articles/Index"><i class="fa-solid fa-newspaper"></i> My Articles</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/Editor/Articles/Create"><i class="fa-solid fa-plus"></i> Create Article</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/Viewer/Index"><i class="fa-solid fa-list"></i> All News</a></li>
+                    </ul>
+
+                    <!-- Notifications -->
+                    <div class="dropdown me-3">
+                        <a class="nav-link text-white dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-bell"></i> <span class="badge bg-danger" id="notifCount">@latestArticles.Count()</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notificationList">
+                            @if (latestArticles.Any())
+                            {
+                                @foreach (var article in latestArticles)
+                                {
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" asp-page="/Viewer/ArticleDetail" asp-route-id="@article.ArticleId">
+                                            <i class="fa-solid fa-newspaper text-primary me-2"></i>
+                                            <div>
+                                                <strong>@article.Title</strong> <br />
+                                                <small class="text-muted">@article.CreatedAt?.ToString("MMMM dd, yyyy")</small>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="dropdown-item text-center text-muted">No new notifications</li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- User Info -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var userName = User.FindFirstValue(ClaimTypes.Name);
+                        <div class="d-flex align-items-center">
+                            <span class="text-white me-2"><i class="fa-solid fa-user"></i> @userName</span>
+                            <form method="post" asp-page="/Logout">
+                                <button class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary px-3" asp-page="/Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-3">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer mt-3 text-center">
+        <div class="container">
+            <p>&copy; @DateTime.Now.Year NewsPortalRazor - All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

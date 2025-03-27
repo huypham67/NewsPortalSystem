@@ -1,0 +1,131 @@
+﻿@page
+@model IndexModel
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Home";
+    var userRole = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.Role) : "Viewer";
+}
+
+@if (userRole == "Admin")
+{
+    <!-- Admin Dashboard -->
+    <div class="container mt-5">
+        <h2 class="text-center fw-bold">Admin Dashboard</h2>
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-users-cog fa-3x text-primary"></i>
+                    <h5 class="mt-3">Manage Users</h5>
+                    <a asp-page="/Admin/Users/Index" class="btn btn-outline-primary mt-2">Go to Users</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-folder fa-3x text-success"></i>
+                    <h5 class="mt-3">Manage Categories</h5>
+                    <a asp-page="/Admin/Categories/Index" class="btn btn-outline-success mt-2">Go to Categories</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-tags fa-3x text-warning"></i>
+                    <h5 class="mt-3">Manage Tags</h5>
+                    <a asp-page="/Admin/Tags/Index" class="btn btn-outline-warning mt-2">Go to Tags</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-newspaper fa-3x text-danger"></i>
+                    <h5 class="mt-3">Manage Articles</h5>
+                    <a asp-page="/Admin/Articles/Index" class="btn btn-outline-danger mt-2">Go to Articles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (userRole == "Editor")
+{
+    <!-- Editor Dashboard -->
+    <div class="container mt-5">
+        <h2 class="text-center fw-bold">Editor Dashboard</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-pen fa-3x text-info"></i>
+                    <h5 class="mt-3">Write New Article</h5>
+                    <a asp-page="/Editor/Articles/Create" class="btn btn-outline-info mt-2">New Article</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-list-alt fa-3x text-success"></i>
+                    <h5 class="mt-3">My Articles</h5>
+                    <a asp-page="/Editor/Articles/Index" class="btn btn-outline-success mt-2">View Articles</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm p-4 text-center">
+                    <i class="fas fa-file-signature fa-3x text-warning"></i>
+                    <h5 class="mt-3">Drafts</h5>
+                    <a asp-page="/Editor/Articles/Drafts" class="btn btn-outline-warning mt-2">Go to Drafts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Viewer Home Page -->
+    <div class="container text-center mt-5">
+        <!-- Hero Section -->
+        <div class="hero p-5 rounded shadow-sm">
+            <h1 class="display-4 fw-bold">Welcome to NewsPortal</h1>
+            <p class="lead">Stay updated with the latest news and trends.</p>
+            <a asp-page="/Viewer/Index" class="btn btn-light btn-lg">Explore News</a>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card feature-card shadow-sm p-4">
+                    <i class="fas fa-newspaper fa-3x text-info"></i>
+                    <h5 class="mt-3">Latest Articles</h5>
+                    <p class="text-muted">Read the most recent news and updates.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card shadow-sm p-4">
+                    <i class="fas fa-layer-group fa-3x text-success"></i>
+                    <h5 class="mt-3">Categories</h5>
+                    <p class="text-muted">Browse articles by categories.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card shadow-sm p-4">
+                    <i class="fas fa-tags fa-3x text-warning"></i>
+                    <h5 class="mt-3">Trending Tags</h5>
+                    <p class="text-muted">Discover trending topics and hashtags.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Feature & Dashboard Cards */
+    .feature-card, .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .feature-card:hover, .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+</style>

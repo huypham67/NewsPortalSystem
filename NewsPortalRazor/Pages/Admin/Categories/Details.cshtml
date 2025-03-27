@@ -1,0 +1,68 @@
+﻿@page
+@model NewsPortalRazor.Pages.Admin.Categories.DetailsModel
+
+@{
+    ViewData["Title"] = "Category Details";
+}
+
+<h2 class="mb-4"><i class="fas fa-folder"></i> Category Details</h2>
+
+<div class="card shadow-lg p-4">
+    <div class="row g-3">
+        <!-- Category Name -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-tag"></i> Name</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Category.Name" readonly />
+        </div>
+
+        <!-- Description -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-align-left"></i> Description</label>
+            <textarea class="form-control-plaintext fw-semibold" rows="4" readonly>@Model.Category.Description</textarea>
+        </div>
+
+        <!-- Parent Category -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-sitemap"></i> Parent Category</label>
+            <input class="form-control-plaintext fw-semibold" value="@(Model.Category.ParentCategory?.Name ?? "None")" readonly />
+        </div>
+
+        <!-- Active Status -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-toggle-on"></i> Status</label>
+            <div>
+                <span class="badge @(Model.Category.IsActive ? "bg-success" : "bg-danger") p-2 fs-6">
+                    @(Model.Category.IsActive ? "Active" : "Inactive")
+                </span>
+            </div>
+        </div>
+
+        <!-- Created At -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-calendar-alt"></i> Created At</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Category.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+        </div>
+
+        <!-- Modified At -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-edit"></i> Modified At</label>
+            <input class="form-control-plaintext fw-semibold" value="@(Model.Category.ModifiedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Never")" readonly />
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-4 d-flex justify-content-between align-items-center">
+        <a asp-page="Index" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <a asp-page="Edit" asp-route-id="@Model.Category.CategoryId" class="btn btn-primary btn-lg">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

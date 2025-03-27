@@ -1,0 +1,104 @@
+﻿@page
+@model NewsPortalRazor.Pages.Admin.Categories.EditModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+}
+
+<h2 class="mb-4"><i class="fas fa-edit"></i> Edit Category</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow-lg p-4">
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Category.CategoryId" />
+
+        <div class="row g-3">
+            <!-- Category Name -->
+            <div class="col-md-6">
+                <label asp-for="Category.Name" class="form-label fw-bold"><i class="fas fa-tag"></i> Name</label>
+                <input asp-for="Category.Name" class="form-control" placeholder="Enter category name" />
+                <span asp-validation-for="Category.Name" class="text-danger"></span>
+            </div>
+
+            <!-- Description -->
+            <!-- Description -->
+            <div class="col-md-6">
+                <label asp-for="Category.Description" class="form-label fw-bold"><i class="fas fa-align-left"></i> Description</label>
+                <textarea asp-for="Category.Description" class="form-control" placeholder="Enter category description" rows="4"></textarea>
+                <span asp-validation-for="Category.Description" class="text-danger"></span>
+            </div>
+
+
+            <!-- Parent Category -->
+            <div class="col-md-6">
+                <label asp-for="Category.ParentCategoryId" class="form-label fw-bold"><i class="fas fa-sitemap"></i> Parent Category</label>
+                <select asp-for="Category.ParentCategoryId" class="form-select" asp-items="ViewBag.ParentCategoryId">
+                    <option value="">None</option>
+                </select>
+                <span asp-validation-for="Category.ParentCategoryId" class="text-danger"></span>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold"><i class="fas fa-toggle-on"></i> Status</label>
+                <span class="badge @(Model.Category.IsActive ? "bg-success" : "bg-danger") p-2 fs-6">
+                    @(Model.Category.IsActive ? "Active" : "Inactive")
+                </span>
+                <input type="hidden" asp-for="Category.IsActive" />
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a asp-page="Index" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+
+                <!-- Toggle Active Status -->
+                <button type="button" class="btn btn-lg @(Model.Category.IsActive ? "btn-danger" : "btn-success")"
+                        onclick="toggleStatus()">
+                    <i class="fas @(Model.Category.IsActive ? "fa-ban" : "fa-check-circle")"></i>
+                    @(Model.Category.IsActive ? "Deactivate" : "Activate")
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function toggleStatus() {
+            const actionText = "@(Model.Category.IsActive ? "deactivate" : "activate")";
+            if (confirm(`Are you sure you want to ${actionText} this category?`)) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '?handler=ToggleStatus';
+                form.innerHTML = `
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="categoryId" value="@Model.Category.CategoryId" />
+                                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

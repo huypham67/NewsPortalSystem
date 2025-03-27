@@ -1,0 +1,98 @@
+﻿@page
+@model NewsPortalRazor.Pages.Editor.Articles.EditModel
+
+@{
+    ViewData["Title"] = "Edit Article";
+}
+
+<h2 class="mb-4"><i class="fas fa-edit"></i> Edit Article</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow-lg p-4 rounded-3">
+    <form method="post" class="needs-validation" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="row g-3">
+            <!-- Article ID (Readonly) -->
+            <div class="col-md-12">
+                <label asp-for="Article.ArticleId" class="form-label fw-bold"><i class="fas fa-key"></i> Article ID</label>
+                <input asp-for="Article.ArticleId" class="form-control" readonly required />
+            </div>
+
+            <!-- Title -->
+            <div class="col-md-12">
+                <label asp-for="Article.Title" class="form-label fw-bold"><i class="fas fa-heading"></i> Title</label>
+                <input asp-for="Article.Title" class="form-control" required />
+            </div>
+
+            <!-- Headline -->
+            <div class="col-md-12">
+                <label asp-for="Article.Headline" class="form-label fw-bold"><i class="fas fa-quote-left"></i> Headline</label>
+                <input asp-for="Article.Headline" class="form-control" required />
+            </div>
+
+            <!-- Content -->
+            <div class="col-md-12">
+                <label asp-for="Article.Content" class="form-label fw-bold"><i class="fas fa-file-alt"></i> Content</label>
+                <textarea asp-for="Article.Content" class="form-control" rows="6" required></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="col-md-6">
+                <label asp-for="Article.CategoryId" class="form-label fw-bold"><i class="fas fa-folder"></i> Category</label>
+                <select asp-for="Article.CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                    <option value="">-- Select Category --</option>
+                </select>
+            </div>
+
+            <!-- Tags -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold"><i class="fas fa-tags"></i> Tags</label>
+                <select asp-for="SelectedTagIds" class="form-select" asp-items="ViewBag.Tags" multiple></select>
+            </div>
+
+            <!-- Status with Badge -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold"><i class="fas fa-toggle-on"></i> Status</label>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge px-3 py-2 @(Model.Article.Status == "Published" ? "bg-success" : Model.Article.Status == "Pending Approval" ? "bg-warning text-dark" : Model.Article.Status == "Draft" ? "bg-secondary" : "bg-danger")">
+                        <i class="@(Model.Article.Status == "Published" ? "fas fa-check-circle" : Model.Article.Status == "Pending Approval" ? "fas fa-clock" : Model.Article.Status == "Draft" ? "fas fa-edit" : "fas fa-archive")"></i>
+                        @Model.Article.Status
+                    </span>
+                    <input type="hidden" asp-for="Article.Status" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div>
+                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Save</button>
+                <a asp-page="Index" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+
+            <div class="d-flex gap-3">
+                @if (Model.Article.Status == "Draft")
+                {
+                    <button type="submit" class="btn btn-success btn-lg" asp-page-handler="PostForApproval">
+                        <i class="fas fa-paper-plane"></i> Post for Approval
+                    </button>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,104 @@
+﻿@page
+@model NewsPortalRazor.Pages.Admin.Articles.DetailsModel
+@{
+    ViewData["Title"] = "Article Details";
+}
+
+<h2 class="mb-4"><i class="fas fa-newspaper"></i> Article Details</h2>
+
+<div class="card shadow-lg p-4">
+    <div class="row g-3">
+        <!-- Title -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-heading"></i> Title</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.Title" readonly />
+        </div>
+
+        <!-- Headline -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-quote-left"></i> Headline</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.Headline" readonly />
+        </div>
+
+        <!-- Content -->
+        <div class="col-12">
+            <label class="form-label fw-bold"><i class="fas fa-align-left"></i> Content</label>
+            <textarea class="form-control-plaintext fw-semibold" rows="5" readonly>@Model.Article.Content</textarea>
+        </div>
+
+        <!-- Source -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-link"></i> Source</label>
+            <input class="form-control-plaintext fw-semibold text-muted" value="@Model.Article.Source" readonly />
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-toggle-on"></i> Status</label>
+            <span class="badge @(Model.Article.Status == "Published" ? "bg-success" : Model.Article.Status == "Pending Approval" ? "bg-warning text-dark" : Model.Article.Status == "Draft" ? "bg-secondary" : "bg-danger") p-2 fs-6">
+                <i class="@(Model.Article.Status == "Published" ? "fas fa-check-circle" : Model.Article.Status == "Pending Approval" ? "fas fa-clock" : Model.Article.Status == "Draft" ? "fas fa-edit" : "fas fa-archive")"></i>
+                @Model.Article.Status
+            </span>
+        </div>
+
+        <!-- Category -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-folder"></i> Category</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.Category.Name" readonly />
+        </div>
+
+        <!-- Tags -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-tags"></i> Tags</label>
+            <div>
+                @if (Model.Article.Tags.Any())
+                {
+                    foreach (var tag in Model.Article.Tags)
+                    {
+                        <span class="badge bg-primary me-1">@tag.Name</span>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">No tags</span>
+                }
+            </div>
+        </div>
+
+        <!-- Created By & Created At -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-user"></i> Created By</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.CreatedBy" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-calendar-alt"></i> Created At</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+        </div>
+
+        <!-- Modified By & Modified At -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-user-edit"></i> Modified By</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.ModifiedBy" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-bold"><i class="fas fa-clock"></i> Modified At</label>
+            <input class="form-control-plaintext fw-semibold" value="@Model.Article.ModifiedAt?.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-4 d-flex justify-content-between align-items-center">
+        <a asp-page="Index" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <a asp-page="Edit" asp-route-id="@Model.Article.ArticleId" class="btn btn-primary btn-lg">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,205 @@
+﻿@page
+@model NewsPortalRazor.Pages.Viewer.IndexModel
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "News Portal";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Column: Articles List -->
+        <div class="col-lg-8">
+            <h2 class="mb-4 fw-bold">All News</h2>
+
+            <div class="row g-4">
+                @if (Model.Articles.Any())
+                {
+                    @foreach (var article in Model.Articles)
+                    {
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 fade-in h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title text-primary fw-bold">@article.Title</h4>
+                                    <p class="card-text text-muted">@article.Headline</p>
+                                    <p class="text-muted small">
+                                        <i class="fas fa-folder"></i> @article.Category?.Name | <i class="far fa-calendar-alt"></i> @article.CreatedAt?.ToString("MMMM dd, yyyy")
+                                    </p>
+                                    <a asp-page="./ArticleDetail" asp-route-id="@article.ArticleId" class="btn btn-outline-primary btn-sm">Read More</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">No articles found.</p>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+                @Html.PagedListPager(Model.Articles, page => Url.Page(
+                         "./Index",
+                         new
+                         {
+                             PageNumber = page,
+                             searchQuery = Model.Filter.SearchQuery,
+                             categoryId = Model.Filter.SelectedCategoryId,
+                             selectedTags = Model.Filter.SelectedTags
+                         }),
+                         new PagedListRenderOptions
+                {
+                    LiElementClasses = new[] { "page-item" },
+                    PageClasses = new[] { "page-link" }
+                })
+            </div>
+        </div>
+
+        <!-- Right Column: Filters -->
+        <div class="col-lg-4">
+            <!-- Search Form -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Search News</h5>
+                    <form method="get">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="Filter.SearchQuery" placeholder="Search news..." value="@Model.Filter.SearchQuery">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Advanced Filters</h5>
+                    <form method="get">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Category</label>
+                            <select class="form-select" name="Filter.SelectedCategoryId">
+                                <option value="">All Categories</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.CategoryId" selected="@(Model.Filter.SelectedCategoryId == category.CategoryId)">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Date Range</label>
+                            <select class="form-select mb-2" name="Filter.DateRange" id="dateRangeSelect">
+                                <option value="">All time</option>
+                                <option value="Today" selected="@(Model.Filter.DateRange == "Today")">Today</option>
+                                <option value="Last 3 days" selected="@(Model.Filter.DateRange == "Last 3 days")">Last 3 days</option>
+                                <option value="Last week" selected="@(Model.Filter.DateRange == "Last week")">Last week</option>
+                                <option value="Last month" selected="@(Model.Filter.DateRange == "Last month")">Last month</option>
+                                <option value="Last 3 months" selected="@(Model.Filter.DateRange == "Last 3 months")">Last 3 months</option>
+                                <option value="Last year" selected="@(Model.Filter.DateRange == "Last year")">Last year</option>
+                            </select>
+                            <div class="d-flex">
+                                <input type="date" class="form-control me-2" name="Filter.StartDate" id="startDate"
+                                       value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")">
+                                <input type="date" class="form-control" name="Filter.EndDate" id="endDate"
+                                       value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tags</label>
+                            <div class="d-flex flex-wrap">
+                                @foreach (var tag in Model.PopularTags)
+                                {
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" name="Filter.SelectedTags" value="@tag.TagId"
+                                        @(Model.Filter.SelectedTags?.Contains(tag.TagId) == true ? "checked" : "")>
+                                        <label class="form-check-label">@tag.Name</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS cho hiệu ứng -->
+<style>
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+        .fade-in.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hiệu ứng fade-in khi cuộn xuống
+        let elements = document.querySelectorAll('.fade-in');
+        let observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        elements.forEach(el => observer.observe(el));
+
+        // Xử lý Date Range & Validate ngày hợp lệ
+        let dateRangeSelect = document.getElementById("dateRangeSelect");
+        let startDateInput = document.getElementById("startDate");
+        let endDateInput = document.getElementById("endDate");
+        let filterForm = document.querySelector("form");
+
+        function toggleDateInputs() {
+            let isCustom = dateRangeSelect.value === "";
+            startDateInput.disabled = !isCustom;
+            endDateInput.disabled = !isCustom;
+
+            if (!isCustom) {
+                startDateInput.value = "";
+                endDateInput.value = "";
+                endDateInput.min = "";
+            }
+        }
+
+        function validateDates(event) {
+            let startDate = new Date(startDateInput.value);
+            let endDate = new Date(endDateInput.value);
+
+            if (startDateInput.value && endDateInput.value && startDate > endDate) {
+                event.preventDefault();
+                alert("Start Date cannot be greater than End Date.");
+            }
+        }
+
+        function updateEndDateMin() {
+            let startDate = new Date(startDateInput.value);
+            if (startDateInput.value) {
+                let minDate = new Date(startDate);
+                minDate.setDate(minDate.getDate()); // Không cho chọn ngày trước StartDate
+                endDateInput.min = minDate.toISOString().split("T")[0];
+            } else {
+                endDateInput.min = ""; // Nếu không có StartDate, reset min của EndDate
+            }
+        }
+
+        dateRangeSelect.addEventListener("change", toggleDateInputs);
+        filterForm.addEventListener("submit", validateDates);
+        startDateInput.addEventListener("change", updateEndDateMin);
+
+        toggleDateInputs();
+    });
+</script>
+
+

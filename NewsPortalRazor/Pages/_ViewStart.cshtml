@@ -1,0 +1,11 @@
+﻿@using System.Security.Claims
+@{
+    var userRole = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.Role) : null;
+
+    Layout = userRole switch
+    {
+        "Admin" => "_AdminLayout",
+        "Editor" => "_EditorLayout",
+        _ => "_ViewerLayout"
+    };
+}

@@ -1,0 +1,124 @@
+﻿@page
+@model NewsPortalRazor.Pages.Admin.Users.EditModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h2 class="mb-4"><i class="fas fa-user-edit"></i> Edit User</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow-lg p-4">
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="User.UserId" />
+
+        <div class="row g-3">
+            <!-- Full Name -->
+            <div class="col-md-6">
+                <label asp-for="User.FullName" class="form-label fw-bold"><i class="fas fa-user"></i> Full Name</label>
+                <input asp-for="User.FullName" class="form-control" placeholder="Enter full name" />
+                <span asp-validation-for="User.FullName" class="text-danger"></span>
+            </div>
+
+            <!-- Email (Read-Only) -->
+            <!-- Email (Chỉ đọc, nhưng vẫn gửi lên form) -->
+            <div class="col-md-6">
+                <label asp-for="User.Email" class="form-label fw-bold"><i class="fas fa-envelope"></i> Email</label>
+                <input asp-for="User.Email" class="form-control" readonly />
+            </div>
+
+            <!-- Role -->
+            <div class="col-md-6">
+                <label asp-for="User.Role" class="form-label fw-bold"><i class="fas fa-user-tag"></i> Role</label>
+                <select asp-for="User.Role" class="form-select">
+                    <option value="Admin">Admin</option>
+                    <option value="Editor">Editor</option>
+                    <option value="Viewer">Viewer</option>
+                </select>
+                <span asp-validation-for="User.Role" class="text-danger"></span>
+            </div>
+
+            <!-- Active Status -->
+            <div class="col-md-6">
+                <label class="form-label fw-bold"><i class="fas fa-toggle-on"></i> Status</label>
+                <span class="badge @(Model.User.IsActive ? "bg-success" : "bg-danger") p-2 fs-6">
+                    @(Model.User.IsActive ? "Active" : "Inactive")
+                </span>
+                <input type="hidden" asp-for="User.IsActive" />
+            </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a asp-page="Index" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <!-- Reset Password -->
+                <button type="button" class="btn btn-warning btn-lg" onclick="resetPassword()">
+                    <i class="fas fa-key"></i> Reset Password
+                </button>
+
+                <!-- Toggle Active Status -->
+                <button type="button" class="btn btn-lg @(Model.User.IsActive ? "btn-danger" : "btn-success")"
+                        onclick="toggleStatus()">
+                    <i class="fas @(Model.User.IsActive ? "fa-ban" : "fa-check-circle")"></i>
+                    @(Model.User.IsActive ? "Deactivate" : "Activate")
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function resetPassword() {
+            if (confirm("Are you sure you want to reset this user's password?")) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '?handler=ResetPassword';
+                form.innerHTML = `
+        @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.User.UserId" />
+                        `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function toggleStatus() {
+            const actionText = "@(Model.User.IsActive ? "deactivate" : "activate")";
+            if (confirm(`Are you sure you want to ${actionText} this user?`)) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '?handler=ToggleStatus';
+                form.innerHTML = `
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.User.UserId" />
+                        `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

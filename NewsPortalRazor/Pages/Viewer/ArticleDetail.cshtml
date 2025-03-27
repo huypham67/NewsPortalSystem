@@ -1,0 +1,104 @@
+﻿@page
+@model NewsPortalRazor.Pages.Viewer.ArticleDetailModel
+@{
+    ViewData["Title"] = Model.Article?.Title ?? "Article Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Bài viết chi tiết -->
+        <div class="col-lg-8">
+            @if (Model.Article != null)
+            {
+                <div class="card shadow-sm p-4">
+                    <h1 class="mb-3">@Model.Article.Title</h1>
+                    <p class="text-muted">
+                        <small>
+                            <i class="fas fa-calendar-alt"></i> @Model.Article.CreatedAt?.ToString("MMMM dd, yyyy") |
+                            <i class="fas fa-folder"></i>
+                            <a asp-page="/Viewer/Index" asp-route-Filter.SelectedCategoryId="@Model.Article.CategoryId"
+                               class="text-primary text-decoration-none fw-bold">@Model.Article.Category?.Name</a> |
+                            <span class="badge bg-@(Model.Article.Status == "Published" ? "success" : "warning")">@Model.Article.Status</span>
+                        </small>
+                    </p>
+
+                    <hr />
+
+                    <div class="content">
+                        @Html.Raw(Model.Article.Content)
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Article.Source))
+                    {
+                        <p class="mt-3">
+                            <strong>Source:</strong>
+                            <a href="#" target="_blank" class="text-decoration-none fw-bold text-info">
+                                @Model.Article.Source
+                            </a>
+                        </p>
+                    }
+
+                    <!-- Tags -->
+                    @if (Model.Article.Tags.Any())
+                    {
+                        <div class="mt-4">
+                            <strong>Tags:</strong>
+                            @foreach (var tag in Model.Article.Tags)
+                            {
+                                <a asp-page="/Viewer/Index" asp-route-selectedTags="@tag.TagId"
+                                   class="badge bg-secondary me-1 text-decoration-none">@tag.Name</a>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-danger text-center fw-bold">❌ Article not found.</p>
+            }
+        </div>
+
+        <!-- Sidebar: Related Articles -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-newspaper"></i> Related Articles</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RelatedArticles.Any())
+                    {
+                        @foreach (var relatedArticle in Model.RelatedArticles)
+                        {
+                            <div class="mb-3">
+                                <h6>
+                                    <a asp-page="/Viewer/ArticleDetail" asp-route-id="@relatedArticle.ArticleId"
+                                       class="text-decoration-none text-dark fw-bold d-block hover-underline">
+                                        @relatedArticle.Title
+                                    </a>
+                                </h6>
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> @relatedArticle.CreatedAt?.ToString("MMMM dd, yyyy")</small>
+                            </div>
+                            <hr class="my-2">
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No related articles found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-underline:hover {
+        text-decoration: underline;
+        color: #007bff !important;
+    }
+
+    .content {
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+</style>
