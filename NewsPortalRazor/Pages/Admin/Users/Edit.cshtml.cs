@@ -8,9 +8,11 @@ using BusinessObjects;
 using BusinessObjects.Entities;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Users
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly BusinessObjects.NewsPortalContext _context;

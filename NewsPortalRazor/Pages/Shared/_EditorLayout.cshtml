@@ -1,11 +1,9 @@
 ﻿@using System.Security.Claims
 @using Services
 @inject ICategoryService CategoryService
-@inject IArticleService ArticleService
 
 @{
     var categories = await CategoryService.GetActiveCategories();
-    var latestArticles = await ArticleService.GetLatestArticles(5);
 }
 
 <!DOCTYPE html>
@@ -14,12 +12,42 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Editor Panel</title>
+
+    <!-- Core CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- External CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+    <style>
+        .dropdown-menu.notifications {
+            max-height: 300px;
+            overflow-y: auto;
+            width: 300px;
+        }
+
+            .dropdown-menu.notifications li a {
+                white-space: normal;
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .dropdown-menu.notifications li.empty {
+                text-align: center;
+                color: #999;
+                padding: 15px;
+            }
+
+        .toast-info {
+            background-color: #17a2b8 !important;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
             <div class="container-fluid">
@@ -29,6 +57,7 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
@@ -53,18 +82,20 @@
                         </li>
                     </ul>
 
-                    <!-- Notification Dropdown -->
+                    <!-- Notifications -->
                     <div class="dropdown me-3">
                         <a class="nav-link text-white dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-bell"></i> <span class="badge bg-danger" id="notificationCount">0</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notificationList">
+                        <ul class="dropdown-menu dropdown-menu-end notifications" aria-labelledby="notificationDropdown" id="notificationList">
+                            <li class="empty"><i class="fa-regular fa-bell-slash"></i> No notifications</li>
+                            <li><hr class="dropdown-divider" /></li>
                             <li><a class="dropdown-item text-center" href="/Editor/Notifications">View All</a></li>
                         </ul>
                     </div>
 
                     <!-- User Info -->
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         var userName = User.FindFirstValue(ClaimTypes.Name);
                         var userRole = User.FindFirstValue(ClaimTypes.Role);
@@ -90,12 +121,15 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <div class="container mt-3">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+        <audio id="notificationSound" src="@Url.Content("~/sounds/notification.mp3")" preload="auto"></audio>
     </div>
 
+    <!-- Footer -->
     <footer class="footer mt-3 text-center">
         <div class="container">
             <p>&copy; @DateTime.Now.Year NewsPortalRazor - All rights reserved.</p>
@@ -110,27 +144,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-        const userId = "@User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)";
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "showDuration": "400",
+            "hideDuration": "1000",
+            "timeOut": "8000",
+            "extendedTimeOut": "2000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
 
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`/notificationHub?userId=${userId}`)
-            .build();
+        const userId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
+        if (userId) {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/notificationHub?userId=" + userId)
+                .build();
 
-        connection.start().catch(err => console.error(err));
+            connection.start().catch(err => console.error(err));
 
-        connection.on("ReceiveNotification", function (message) {
-            console.log("Received notification: ", message);
-            const list = document.getElementById("notificationList");
-            const newItem = document.createElement("li");
-            newItem.innerHTML = `<a class="dropdown-item">${message}</a>`;
-            list.prepend(newItem);
+            connection.on("ReceiveNotification", function (message, articleId) {
+                document.addEventListener("click", () => {
+                    const audio = document.getElementById("notificationSound");
+                    if (audio) {
+                        audio.volume = 1.0;
+                        audio.play().catch(err => console.warn("Audio play failed:", err));
+                    }
+                }, { once: true });
 
-            let countText = document.getElementById("notificationCount").innerText.trim();
-            let count = isNaN(parseInt(countText)) ? 0 : parseInt(countText);
-            document.getElementById("notificationCount").innerText = count + 1;
 
-            toastr.info(message);
-        });
+                // Hiển thị toastr
+                toastr.info(message);
+
+                // Cập nhật danh sách thông báo
+                const list = document.getElementById("notificationList");
+
+                // Xóa dòng "No notifications" nếu có
+                const emptyItem = list.querySelector(".empty");
+                if (emptyItem) {
+                    emptyItem.remove();
+                }
+
+                // Tạo thông báo mới
+                const newItem = document.createElement("li");
+                const link = document.createElement("a");
+                link.className = "dropdown-item";
+                link.href = `/Editor/Articles/Details?id=${articleId}`;
+                link.textContent = message;
+                newItem.appendChild(link);
+
+                // Chèn thông báo trước dòng "View All"
+                const viewAllItem = list.lastElementChild;
+                list.insertBefore(newItem, viewAllItem);
+
+                // Tăng số lượng thông báo
+                const badge = document.getElementById("notificationCount");
+                let count = parseInt(badge.textContent) || 0;
+                badge.textContent = count + 1;
+            });
+        }
+
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

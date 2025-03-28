@@ -1,4 +1,5 @@
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 
 namespace NewsPortalRazor.Pages.Editor
 {
+    [Authorize(Roles = "Editor")]
     public class NotificationsModel : PageModel
     {
         private readonly INotificationService _notificationService;

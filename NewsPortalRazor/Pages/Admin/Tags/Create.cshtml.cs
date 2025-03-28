@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using BusinessObjects;
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Tags
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly NewsPortalContext _context;

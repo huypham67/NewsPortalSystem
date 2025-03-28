@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using BusinessObjects;
 using BusinessObjects.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Categories
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly NewsPortalContext _context;

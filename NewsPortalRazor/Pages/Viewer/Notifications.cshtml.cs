@@ -1,10 +1,12 @@
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services;
 
 namespace NewsPortalRazor.Pages.Viewer
 {
+    [Authorize(Roles = "Viewer")]
     public class NotificationsModel : PageModel
     {
         private readonly INotificationService _notificationService;

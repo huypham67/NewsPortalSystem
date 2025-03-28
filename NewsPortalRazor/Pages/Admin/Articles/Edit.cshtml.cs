@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging;
 using System.Security.Claims;
 using Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Articles
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly NewsPortalContext _context;

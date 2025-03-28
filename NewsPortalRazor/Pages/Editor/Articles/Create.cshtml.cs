@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using BusinessObjects.Entities;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Editor.Articles
 {
+    [Authorize(Roles = "Editor")]
     public class CreateModel : PageModel
     {
         private readonly NewsPortalContext _context;

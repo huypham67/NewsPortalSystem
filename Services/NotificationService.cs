@@ -29,10 +29,12 @@ namespace Services
                 Message = message,
                 ArticleId = articleId
             };
+            await _notificationRepo.AddNotificationAsync(notification);
             // Debug log kiểm tra có gửi đúng userId không
             Console.WriteLine($"[NotifyUserAsync] Sending notification to user {userId}: {message}");
             // Gửi thông báo qua SignalR
-            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
+            await _hubContext.Clients.User(userId.ToString())
+                .SendAsync("ReceiveNotification", message, articleId);
         }
 
         public async Task<List<Notification>> GetUserNotificationsAsync(int userId)

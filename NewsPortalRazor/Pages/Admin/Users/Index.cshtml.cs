@@ -7,9 +7,11 @@ using X.PagedList;
 using Azure;
 using System.Drawing.Printing;
 using X.PagedList.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Users
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly NewsPortalContext _context;

@@ -6,6 +6,7 @@ using RealTimeHub;
 using Repositories;
 using Services;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +15,9 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddSignalR();
 
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
 builder.Services.AddDbContext<NewsPortalContext>(options =>
-
-
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -71,6 +72,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();

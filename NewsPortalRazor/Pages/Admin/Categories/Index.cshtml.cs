@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BusinessObjects;
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
@@ -9,6 +10,7 @@ using X.PagedList.Extensions;
 
 namespace NewsPortalRazor.Pages.Admin.Categories
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly NewsPortalContext _context;

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using BusinessObjects.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Editor.Articles
 {
+    [Authorize(Roles = "Editor")]
     public class DetailsModel : PageModel
     {
         private readonly NewsPortalContext _context;

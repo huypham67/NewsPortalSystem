@@ -6,9 +6,11 @@ using BusinessObjects.Entities;
 using X.PagedList;
 using System.Security.Claims;
 using X.PagedList.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Editor.Articles
 {
+    [Authorize(Roles = "Editor")]
     public class IndexModel : PageModel
     {
         private readonly NewsPortalContext _context;

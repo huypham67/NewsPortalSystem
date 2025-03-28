@@ -6,9 +6,11 @@ using BusinessObjects;
 using BusinessObjects.Entities;
 using System.Security.Claims;
 using Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Admin.Articles
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly NewsPortalContext _context;

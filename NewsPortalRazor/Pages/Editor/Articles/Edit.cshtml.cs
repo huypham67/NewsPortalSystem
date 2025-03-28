@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using NuGet.Packaging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NewsPortalRazor.Pages.Editor.Articles
 {
+    [Authorize(Roles = "Editor")]
     public class EditModel : PageModel
     {
         private readonly NewsPortalContext _context;
