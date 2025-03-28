@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 </head>
 <body>
     <header>
@@ -30,37 +31,35 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link" asp-page="/Index"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Editor/Articles/Index"><i class="fa-solid fa-newspaper"></i> My Articles</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Editor/Articles/Create"><i class="fa-solid fa-plus"></i> Create Article</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Viewer/Index"><i class="fa-solid fa-list"></i> All News</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Index">
+                                <i class="fa-solid fa-gauge"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Editor/Articles/Index">
+                                <i class="fa-solid fa-newspaper"></i> My Articles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Editor/Articles/Create">
+                                <i class="fa-solid fa-plus"></i> Create Article
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Viewer/Index">
+                                <i class="fa-solid fa-list"></i> All News
+                            </a>
+                        </li>
                     </ul>
 
-                    <!-- Notifications -->
+                    <!-- Notification Dropdown -->
                     <div class="dropdown me-3">
                         <a class="nav-link text-white dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-bell"></i> <span class="badge bg-danger" id="notifCount">@latestArticles.Count()</span>
+                            <i class="fa-solid fa-bell"></i> <span class="badge bg-danger" id="notificationCount">0</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notificationList">
-                            @if (latestArticles.Any())
-                            {
-                                @foreach (var article in latestArticles)
-                                {
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" asp-page="/Viewer/ArticleDetail" asp-route-id="@article.ArticleId">
-                                            <i class="fa-solid fa-newspaper text-primary me-2"></i>
-                                            <div>
-                                                <strong>@article.Title</strong> <br />
-                                                <small class="text-muted">@article.CreatedAt?.ToString("MMMM dd, yyyy")</small>
-                                            </div>
-                                        </a>
-                                    </li>
-                                }
-                            }
-                            else
-                            {
-                                <li class="dropdown-item text-center text-muted">No new notifications</li>
-                            }
+                            <li><a class="dropdown-item text-center" href="/Editor/Notifications">View All</a></li>
                         </ul>
                     </div>
 
@@ -68,16 +67,23 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         var userName = User.FindFirstValue(ClaimTypes.Name);
+                        var userRole = User.FindFirstValue(ClaimTypes.Role);
                         <div class="d-flex align-items-center">
-                            <span class="text-white me-2"><i class="fa-solid fa-user"></i> @userName</span>
+                            <span class="text-white me-2">
+                                <i class="fa-solid fa-user"></i> @userName - @userRole
+                            </span>
                             <form method="post" asp-page="/Logout">
-                                <button class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
                             </form>
                         </div>
                     }
                     else
                     {
-                        <a class="btn btn-primary px-3" asp-page="/Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a class="btn btn-primary px-3" asp-page="/Login">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
                     }
                 </div>
             </div>
@@ -100,6 +106,33 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft-signalr/signalr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        const userId = "@User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)";
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(`/notificationHub?userId=${userId}`)
+            .build();
+
+        connection.start().catch(err => console.error(err));
+
+        connection.on("ReceiveNotification", function (message) {
+            console.log("Received notification: ", message);
+            const list = document.getElementById("notificationList");
+            const newItem = document.createElement("li");
+            newItem.innerHTML = `<a class="dropdown-item">${message}</a>`;
+            list.prepend(newItem);
+
+            let countText = document.getElementById("notificationCount").innerText.trim();
+            let count = isNaN(parseInt(countText)) ? 0 : parseInt(countText);
+            document.getElementById("notificationCount").innerText = count + 1;
+
+            toastr.info(message);
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

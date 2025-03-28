@@ -1,0 +1,37 @@
+﻿@page
+@model NewsPortalRazor.Pages.Editor.NotificationsModel
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<h2 class="mb-4"><i class="fa-solid fa-bell"></i> Your Notifications</h2>
+
+@if (Model.Notifications != null && Model.Notifications.Any())
+{
+    <div class="list-group">
+        @foreach (var notification in Model.Notifications)
+        {
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fa-solid fa-circle-info text-primary me-2"></i>
+                    <span>@notification.Message</span>
+                    <div class="text-muted small">Received @notification.CreatedAt.ToString("g")</div>
+                </div>
+                @if (!notification.IsRead)
+                {
+                    <span class="badge bg-warning text-dark">New</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Read</span>
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="fa-solid fa-inbox"></i> You have no notifications.
+    </div>
+}

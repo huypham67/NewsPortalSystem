@@ -31,8 +31,8 @@ namespace Services
             };
             // Debug log kiểm tra có gửi đúng userId không
             Console.WriteLine($"[NotifyUserAsync] Sending notification to user {userId}: {message}");
-            // Gửi thông báo qua SignalR (dùng Groups thay vì Clients.User)
-            await _hubContext.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", message);
+            // Gửi thông báo qua SignalR
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
         }
 
         public async Task<List<Notification>> GetUserNotificationsAsync(int userId)
